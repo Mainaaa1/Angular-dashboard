@@ -1,10 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DashboardService } from '../../core/services/dashboard.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { DataTableComponent, TableColumn } from '../../shared/components/data-table.component';
-import { Product } from '../../core/models';
+import { DashboardService } from '@core/services/dashboard.service';
+import { NotificationService } from '@core/services/notification.service';
+import { DataTableComponent, TableColumn } from '@shared/components/data-table.component';
+import { Product, PaginatedResponse } from '@core/models';
 
 @Component({
   selector: 'app-products',
@@ -323,10 +323,14 @@ import { Product } from '../../core/models';
   `]
 })
 export class ProductsComponent implements OnInit {
+  ngOnInit(): void {
+    this.loadProducts();
+  }
+
   readonly tableColumns: TableColumn[] = [
     { key: 'name', label: 'Product Name', type: 'text' },
     { key: 'category', label: 'Category', type: 'text' },
-    { key: 'price', label: 'Price', type: 'text', format: (v) => \`$\${v}\` },
+    { key: 'price', label: 'Price', type: 'text', format: (v: any) => `$${v}` },
     { key: 'stock', label: 'Stock', type: 'text' },
     { key: 'sales', label: 'Sales', type: 'text' },
     { key: 'status', label: 'Status', type: 'badge' },
@@ -350,7 +354,7 @@ export class ProductsComponent implements OnInit {
     category: 'Electronics',
     price: 0,
     stock: 0,
-    status: 'active' as const
+    status: 'active' as 'active' | 'inactive'
   };
 
   constructor(
@@ -358,12 +362,8 @@ export class ProductsComponent implements OnInit {
     private notificationService: NotificationService
   ) {}
 
-  ngOnInit(): void {
-    this.loadProducts();
-  }
-
   private loadProducts(): void {
-    this.dashboardService.getProducts(this.currentPage(), this.itemsPerPage()).subscribe(response => {
+    this.dashboardService.getProducts(this.currentPage(), this.itemsPerPage()).subscribe((response: PaginatedResponse<Product>) => {
       this.products.set(response.data);
       this.paginationData.set({
         page: response.page,
@@ -432,14 +432,14 @@ export class ProductsComponent implements OnInit {
     }
 
     this.notificationService.success(
-      \`Product \${this.editingProduct() ? 'updated' : 'created'} successfully\`
+      `Product ${this.editingProduct() ? 'updated' : 'created'} successfully`
     );
     this.closeModal();
     this.loadProducts();
   }
 
   deleteProduct(product: Product): void {
-    if (confirm(\`Are you sure you want to delete \${product.name}?\`)) {
+    if (confirm(`Are you sure you want to delete ${product.name}?`)) {
       this.notificationService.success('Product deleted successfully');
       this.loadProducts();
     }

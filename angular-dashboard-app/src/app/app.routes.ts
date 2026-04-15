@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
-import { LayoutComponent } from './shared/components/layout.component';
-import { LoginComponent } from './pages/login.page';
-import { DashboardComponent } from './pages/dashboard.page';
-import { UsersComponent } from './pages/users.page';
-import { ProductsComponent } from './pages/products.page';
-import { SettingsComponent } from './pages/settings.page';
-import { authGuard } from './core/guards/auth.guard';
+import { LayoutComponent } from '@shared/components/layout.component';
+import { LoginComponent } from '@pages/login.page';
+import { DashboardComponent } from '@pages/dashboard.page';
+import { UsersComponent } from '@pages/users.page';
+import { ProductsComponent } from '@pages/products.page';
+import { SettingsComponent } from '@pages/settings.page';
+import { authGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
   {

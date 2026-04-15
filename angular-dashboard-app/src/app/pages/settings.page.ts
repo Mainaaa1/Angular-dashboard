@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-settings',
@@ -408,7 +408,9 @@ import { NotificationService } from '../../core/services/notification.service';
   `]
 })
 export class SettingsComponent {
-  readonly user = this.authService.user;
+  get user() {
+    return this.authService.user;
+  }
 
   settings = {
     emailNotifications: true,

@@ -1,7 +1,6 @@
 import { Component, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -10,7 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <header class="header">
       <div class="header-left">
-        <button class="sidebar-toggle" (click)="onToggleSidebar()" [@fadeInOut]>
+        <button class="sidebar-toggle" (click)="onToggleSidebar()">
           <span class="icon">☰</span>
         </button>
         <h1 class="logo">Dashboard</h1>
@@ -250,22 +249,13 @@ import { AuthService } from '../../core/services/auth.service';
         display: none;
       }
     }
-  `],
-  animations: [
-    trigger('fadeInOut', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('200ms ease-in', style({ opacity: 1 }))
-      ]),
-      transition(':leave', [
-        animate('200ms ease-out', style({ opacity: 0 }))
-      ])
-    ])
-  ]
+  `]
 })
 export class HeaderComponent {
-  readonly authService = AuthService;
-  readonly user = this.auth.user;
+  get user() {
+    return this.auth.user;
+  }
+
   readonly isUserMenuOpen = signal(false);
 
   toggleSidebar = output<void>();

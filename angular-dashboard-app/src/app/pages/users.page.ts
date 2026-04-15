@@ -1,10 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../core/services/user.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { DataTableComponent, TableColumn } from '../../shared/components/data-table.component';
-import { User } from '../../core/models';
+import { UserService } from '@core/services/user.service';
+import { NotificationService } from '@core/services/notification.service';
+import { DataTableComponent, TableColumn } from '@shared/components/data-table.component';
+import { PaginatedResponse, User } from '@core/models';
 
 @Component({
   selector: 'app-users',
@@ -338,8 +338,8 @@ export class UsersComponent implements OnInit {
   formData = {
     name: '',
     email: '',
-    role: 'user' as const,
-    status: 'active' as const
+    role: 'user' as 'user' | 'admin' | 'editor',
+    status: 'active' as 'active' | 'inactive'
   };
 
   constructor(
@@ -352,7 +352,7 @@ export class UsersComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.userService.getUsers(this.currentPage(), this.itemsPerPage()).subscribe(response => {
+    this.userService.getUsers(this.currentPage(), this.itemsPerPage()).subscribe((response: PaginatedResponse<User>) => {
       this.users.set(response.data);
       this.paginationData.set({
         page: response.page,
@@ -436,7 +436,7 @@ export class UsersComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
-    if (confirm(\`Are you sure you want to delete \${user.name}?\`)) {
+    if (confirm(`Are you sure you want to delete ${user.name}?`)) {
       this.userService.deleteUser(user.id).subscribe(() => {
         this.notificationService.success('User deleted successfully');
         this.loadUsers();

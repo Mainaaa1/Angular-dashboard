@@ -1,17 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChartConfiguration, ChartType } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
-import { DashboardService } from '../../core/services/dashboard.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { MetricCardComponent } from '../../shared/components/metric-card.component';
-import { DashboardMetrics, AnalyticsData } from '../../core/models';
+import { DashboardService } from '@core/services/dashboard.service';
+import { NotificationService } from '@core/services/notification.service';
+import { MetricCardComponent } from '@shared/components/metric-card.component';
+import { DashboardMetrics, AnalyticsData } from '@core/models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseChartDirective, MetricCardComponent],
+  imports: [CommonModule, FormsModule, MetricCardComponent],
   template: `
     <div class="dashboard">
       <div class="dashboard-header">
@@ -50,24 +48,28 @@ import { DashboardMetrics, AnalyticsData } from '../../core/models';
               <option value="yearly">Yearly</option>
             </select>
           </div>
-          <canvas baseChart
-            [type]="lineChartType"
-            [data]="(revenueChartData() || emptyChart) as never"
-            [options]="lineChartOptions"
-            class="chart">
-          </canvas>
+          <div class="chart-placeholder">
+            <div class="chart-bar" style="height: 40%"></div>
+            <div class="chart-bar" style="height: 60%"></div>
+            <div class="chart-bar" style="height: 80%"></div>
+            <div class="chart-bar" style="height: 50%"></div>
+            <div class="chart-bar" style="height: 70%"></div>
+            <div class="chart-bar" style="height: 90%"></div>
+          </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-header">
             <h3 class="chart-title">User Activity</h3>
           </div>
-          <canvas baseChart
-            [type]="lineChartType"
-            [data]="(usersChartData() || emptyChart) as never"
-            [options]="lineChartOptions"
-            class="chart">
-          </canvas>
+          <div class="chart-placeholder">
+            <div class="chart-line">
+              <svg viewBox="0 0 300 150" class="line-chart">
+                <polyline fill="none" stroke="#3b82f6" stroke-width="2" 
+                  points="0,120 50,100 100,80 150,60 200,40 250,20 300,10"/>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -76,12 +78,15 @@ import { DashboardMetrics, AnalyticsData } from '../../core/models';
           <div class="chart-header">
             <h3 class="chart-title">Sales by Category</h3>
           </div>
-          <canvas baseChart
-            [type]="doughnutChartType"
-            [data]="(categoryChartData() || emptyChart) as never"
-            [options]="doughnutChartOptions"
-            class="chart">
-          </canvas>
+          <div class="chart-placeholder">
+            <div class="pie-segments">
+              <div class="pie-segment" style="background: #3b82f6; flex: 28"></div>
+              <div class="pie-segment" style="background: #10b981; flex: 22"></div>
+              <div class="pie-segment" style="background: #f59e0b; flex: 18"></div>
+              <div class="pie-segment" style="background: #ef4444; flex: 15"></div>
+              <div class="pie-segment" style="background: #8b5cf6; flex: 17"></div>
+            </div>
+          </div>
         </div>
 
         <div class="activity-card">
@@ -182,6 +187,55 @@ import { DashboardMetrics, AnalyticsData } from '../../core/models';
 
     .chart {
       max-height: 300px;
+    }
+
+    .chart-placeholder {
+      height: 300px;
+      display: flex;
+      align-items: end;
+      justify-content: space-around;
+      padding: 20px;
+      background: linear-gradient(to top, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 8px;
+    }
+
+    .chart-bar {
+      width: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px 4px 0 0;
+      transition: all 0.3s ease;
+    }
+
+    .chart-bar:hover {
+      transform: scaleY(1.1);
+    }
+
+    .chart-line {
+      width: 100%;
+      height: 100%;
+    }
+
+    .line-chart {
+      width: 100%;
+      height: 100%;
+    }
+
+    .pie-segments {
+      display: flex;
+      height: 200px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 50px auto;
+      width: 200px;
+    }
+
+    .pie-segment {
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .pie-segment:hover {
+      transform: scale(1.05);
     }
 
     .activity-card {
@@ -287,56 +341,9 @@ import { DashboardMetrics, AnalyticsData } from '../../core/models';
 })
 export class DashboardComponent implements OnInit {
   readonly metrics = signal<DashboardMetrics | null>(null);
-  readonly revenueChartData = signal<AnalyticsData | null>(null);
-  readonly usersChartData = signal<AnalyticsData | null>(null);
-  readonly categoryChartData = signal<AnalyticsData | null>(null);
   readonly recentActivities = signal<any[]>([]);
 
   timeFrame = 'monthly';
-  lineChartType: ChartType = 'line';
-  doughnutChartType: ChartType = 'doughnut';
-
-  emptyChart = {
-    labels: [],
-    datasets: []
-  };
-
-  lineChartOptions: ChartConfiguration<'line'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: {
-          usePointStyle: true,
-          padding: 15,
-          font: { size: 12 }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: { color: 'rgba(0,0,0,0.05)' }
-      },
-      x: {
-        grid: { display: false }
-      }
-    }
-  };
-
-  doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'right',
-        labels: { usePointStyle: true, padding: 15, font: { size: 12 } }
-      }
-    }
-  };
 
   constructor(
     private dashboardService: DashboardService,
@@ -348,29 +355,17 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboardData(): void {
-    this.dashboardService.getMetrics().subscribe(metrics => {
+    this.dashboardService.getMetrics().subscribe((metrics: DashboardMetrics) => {
       this.metrics.set(metrics);
     });
 
-    this.dashboardService.getRevenueChart().subscribe(data => {
-      this.revenueChartData.set(data);
-    });
-
-    this.dashboardService.getUsersChart().subscribe(data => {
-      this.usersChartData.set(data);
-    });
-
-    this.dashboardService.getCategoryChart().subscribe(data => {
-      this.categoryChartData.set(data);
-    });
-
-    this.dashboardService.getRecentActivity().subscribe(activities => {
+    this.dashboardService.getRecentActivity().subscribe((activities: any[]) => {
       this.recentActivities.set(activities);
     });
   }
 
   onTimeFrameChange(): void {
-    this.notificationService.info(\`Showing \${this.timeFrame} data\`);
+    this.notificationService.info(`Showing ${this.timeFrame} data`);
     // In a real app, this would reload data based on timeframe
   }
 
@@ -379,12 +374,12 @@ export class DashboardComponent implements OnInit {
     const diffInMinutes = Math.floor((now.getTime() - new Date(date).getTime()) / 60000);
     
     if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return \`\${diffInMinutes}m ago\`;
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return \`\${diffInHours}h ago\`;
+    if (diffInHours < 24) return `${diffInHours}h ago`;
     
     const diffInDays = Math.floor(diffInHours / 24);
-    return \`\${diffInDays}d ago\`;
+    return `${diffInDays}d ago`;
   }
 }

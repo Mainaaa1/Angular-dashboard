@@ -33,8 +33,8 @@ export interface AnalyticsData {
   datasets: Array<{
     label: string;
     data: number[];
-    borderColor?: string;
-    backgroundColor?: string;
+    borderColor?: string | string[];
+    backgroundColor?: string | string[];
     fill?: boolean;
   }>;
 }

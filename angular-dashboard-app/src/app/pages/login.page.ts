@@ -2,8 +2,9 @@ import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
+import { AuthState } from '@core/models';
 
 @Component({
   selector: 'app-login',
@@ -295,7 +296,7 @@ export class LoginComponent implements OnInit {
 
     this.isLoading.set(true);
     this.authService.login(this.email, this.password).subscribe({
-      next: (authState) => {
+      next: (authState: AuthState) => {
         this.authService.setAuthState(authState);
         this.notificationService.success('Welcome back!');
         this.router.navigate(['/dashboard']);

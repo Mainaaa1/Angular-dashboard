@@ -24,7 +24,7 @@ export interface TableColumn {
           </tr>
         </thead>
         <tbody class="table-body">
-          <tr *ngFor="let row of data(); let idx = index" class="table-row" [class.clickable]="onRowClick.observers.length > 0">
+          <tr *ngFor="let row of data(); let idx = index" class="table-row">
             <td *ngFor="let column of columns()" [style.width]="column.width" (click)="onRowClick.emit(row)">
               <span *ngIf="column.type === 'text'" class="cell-content">
                 {{ row[column.key] }}
@@ -54,15 +54,15 @@ export interface TableColumn {
       </table>
     </div>
 
-    <div class="table-footer" *ngIf="pagination">
+    <div class="table-footer" *ngIf="pagination()">
       <div class="pagination-info">
-        Showing {{ (pagination.page - 1) * pagination.limit + 1 }} to 
-        {{ Math.min(pagination.page * pagination.limit, pagination.total) }} of {{ pagination.total }}
+        Showing {{ (pagination().page - 1) * pagination().limit + 1 }} to 
+        {{ Math.min(pagination().page * pagination().limit, pagination().total) }} of {{ pagination().total }}
       </div>
       <div class="pagination">
-        <button [disabled]="pagination.page === 1" (click)="onPreviousPage.emit()">← Previous</button>
-        <span class="page-number">Page {{ pagination.page }}</span>
-        <button [disabled]="pagination.page * pagination.limit >= pagination.total" (click)="onNextPage.emit()">Next →</button>
+        <button [disabled]="pagination().page === 1" (click)="onPreviousPage.emit()">← Previous</button>
+        <span class="page-number">Page {{ pagination().page }}</span>
+        <button [disabled]="pagination().page * pagination().limit >= pagination().total" (click)="onNextPage.emit()">Next →</button>
       </div>
     </div>
   `,
