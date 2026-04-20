@@ -1,8 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { DashboardService } from '@core/services/dashboard.service';
 import { NotificationService } from '@core/services/notification.service';
+
 import { DataTableComponent, TableColumn } from '@shared/components/data-table.component';
 import { Product, PaginatedResponse } from '@core/models';
 
@@ -12,80 +14,97 @@ import { Product, PaginatedResponse } from '@core/models';
   imports: [CommonModule, FormsModule, DataTableComponent],
   template: `
     <div class="products-page">
+
+      <!-- Header -->
       <div class="page-header">
         <div>
-          <h1 class="page-title">Product Catalog</h1>
-          <p class="page-subtitle">View and manage your product inventory</p>
+          <h1 class="page-title">Products</h1>
+          <p class="page-subtitle">Manage your inventory</p>
         </div>
-        <button class="btn btn-primary" (click)="openCreateModal()">➕ Add Product</button>
+
+        <button class="btn-primary" (click)="openCreateModal()">
+          Add Product
+        </button>
       </div>
 
+      <!-- Filters -->
       <div class="filters-bar">
-        <input type="text" [(ngModel)]="searchQuery" (input)="onSearch()" placeholder="Search products..." class="search-input">
-        <select [(ngModel)]="categoryFilter" (change)="onCategoryFilterChange()" class="filter-select">
+        <input 
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="Search products..."
+          class="input"
+        />
+
+        <select [(ngModel)]="categoryFilter" (change)="onCategoryFilterChange()" class="input">
           <option value="">All Categories</option>
           <option value="Electronics">Electronics</option>
           <option value="Clothing">Clothing</option>
           <option value="Food">Food</option>
           <option value="Books">Books</option>
         </select>
-        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()" class="filter-select">
+
+        <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()" class="input">
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
       </div>
 
+      <!-- Table -->
       <app-data-table 
         [columns]="tableColumns"
         [data]="displayedProducts()"
         [pagination]="paginationData()"
-        (onEdit)="openEditModal(\$event)"
-        (onDelete)="deleteProduct(\$event)"
+        (onEdit)="openEditModal($event)"
+        (onDelete)="deleteProduct($event)"
         (onNextPage)="goToNextPage()"
         (onPreviousPage)="goToPreviousPage()">
       </app-data-table>
 
-      <!-- Create/Edit Modal -->
+      <!-- Modal -->
       <div *ngIf="isModalOpen()" class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="\$event.stopPropagation()">
+        <div class="modal" (click)="$event.stopPropagation()">
+
           <div class="modal-header">
-            <h2>{{ editingProduct() ? 'Edit Product' : 'Add New Product' }}</h2>
+            <h2>{{ editingProduct() ? 'Edit Product' : 'New Product' }}</h2>
             <button class="modal-close" (click)="closeModal()">✕</button>
           </div>
 
           <form class="modal-body" (ngSubmit)="saveProduct()">
+
             <div class="form-group">
               <label>Product Name</label>
-              <input type="text" [(ngModel)]="formData.name" name="name" required class="form-input">
+              <input [(ngModel)]="formData.name" name="name" required class="input">
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Category</label>
-                <select [(ngModel)]="formData.category" name="category" class="form-input">
-                  <option value="Electronics">Electronics</option>
-                  <option value="Clothing">Clothing</option>
-                  <option value="Food">Food</option>
-                  <option value="Books">Books</option>
+                <select [(ngModel)]="formData.category" name="category" class="input">
+                  <option>Electronics</option>
+                  <option>Clothing</option>
+                  <option>Food</option>
+                  <option>Books</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label>Price ($)</label>
-                <input type="number" [(ngModel)]="formData.price" name="price" required min="0" class="form-input">
+                <label>Price</label>
+                <input type="number" [(ngModel)]="formData.price" name="price" class="input">
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Stock</label>
-                <input type="number" [(ngModel)]="formData.stock" name="stock" required min="0" class="form-input">
+                <input type="number" [(ngModel)]="formData.stock" name="stock" class="input">
               </div>
 
               <div class="form-group">
                 <label>Status</label>
-                <select [(ngModel)]="formData.status" name="status" class="form-input">
+                <select [(ngModel)]="formData.status" name="status" class="input">
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
@@ -93,9 +112,17 @@ import { Product, PaginatedResponse } from '@core/models';
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary">{{ editingProduct() ? 'Update' : 'Create' }} Product</button>
+              <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+
+              <button type="submit" class="btn-primary" [disabled]="isSaving()">
+                <span class="btn-content">
+                  <span *ngIf="!isSaving()">Save</span>
+                  <span *ngIf="isSaving()" class="spinner"></span>
+                  <span *ngIf="isSaving()">Saving...</span>
+                </span>
+              </button>
             </div>
+
           </form>
         </div>
       </div>
@@ -103,229 +130,164 @@ import { Product, PaginatedResponse } from '@core/models';
   `,
   styles: [`
     .products-page {
-      animation: fadeIn 0.3s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
     }
 
     .page-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 2rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
     }
 
     .page-title {
-      margin: 0;
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      color: #2d3748;
     }
 
     .page-subtitle {
-      margin: 0.5rem 0 0 0;
-      color: #718096;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      color: #64748b;
     }
 
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .input {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
       font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
+
+    .filters-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #4f46e5;
       color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
     .btn-secondary {
       background: #e2e8f0;
-      color: #4a5568;
-    }
-
-    .btn-secondary:hover {
-      background: #cbd5e0;
-    }
-
-    .filters-bar {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .search-input,
-    .filter-select {
-      padding: 0.75rem 1rem;
-      border: 1px solid #cbd5e0;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-      background: white;
-    }
-
-    .search-input {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .search-input:focus,
-    .filter-select:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
     }
 
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      animation: fadeIn 0.2s ease-in;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: grid;
+      place-items: center;
     }
 
     .modal {
+      width: 100%;
+      max-width: 480px;
       background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-      max-width: 500px;
-      width: 90%;
-      animation: slideUp 0.3s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     .modal-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e5e7eb;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .modal-header h2 {
-      margin: 0;
-      font-size: 1.25rem;
-      color: #2d3748;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #718096;
-      transition: color 0.2s ease;
-    }
-
-    .modal-close:hover {
-      color: #2d3748;
     }
 
     .modal-body {
-      padding: 1.5rem;
+      padding: 1.25rem;
     }
 
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #cbd5e0;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-      box-sizing: border-box;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    .modal-footer {
+      padding: 1rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      border-top: 1px solid #e5e7eb;
     }
 
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
-    .modal-footer {
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .btn-content {
       display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-      padding: 1.5rem;
-      border-top: 1px solid #e2e8f0;
-      background: #f7fafc;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     @media (max-width: 768px) {
-      .page-header {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
       .filters-bar {
-        flex-direction: column;
-      }
-
-      .search-input,
-      .filter-select {
-        width: 100%;
+        grid-template-columns: 1fr;
       }
 
       .form-row {
         grid-template-columns: 1fr;
       }
 
-      .modal-footer {
+      .page-header {
         flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
+        align-items: flex-start;
+        gap: 1rem;
       }
     }
   `]
 })
 export class ProductsComponent implements OnInit {
-  ngOnInit(): void {
-    this.loadProducts();
-  }
+
+  readonly products = signal<Product[]>([]);
+  readonly currentPage = signal(1);
+  readonly itemsPerPage = signal(10);
+  readonly isModalOpen = signal(false);
+  readonly editingProduct = signal<Product | null>(null);
+  readonly displayedProducts = signal<Product[]>([]);
+  readonly paginationData = signal<any>(null);
+  readonly isSaving = signal(false);
+
+  searchQuery = '';
+  categoryFilter = '';
+  statusFilter = '';
+
+  formData = {
+    name: '',
+    category: 'Electronics',
+    price: 0,
+    stock: 0,
+    status: 'active' as 'active' | 'inactive'
+  };
 
   readonly tableColumns: TableColumn[] = [
     { key: 'name', label: 'Product Name', type: 'text' },
@@ -337,51 +299,32 @@ export class ProductsComponent implements OnInit {
     { key: 'actions', label: 'Actions', type: 'actions' }
   ];
 
-  readonly products = signal<Product[]>([]);
-  readonly currentPage = signal(1);
-  readonly itemsPerPage = signal(10);
-  readonly isModalOpen = signal(false);
-  readonly editingProduct = signal<Product | null>(null);
-  
-  readonly displayedProducts = signal<Product[]>([]);
-  readonly paginationData = signal<any>(null);
-
-  searchQuery = '';
-  categoryFilter = '';
-  statusFilter = '';
-  formData = {
-    name: '',
-    category: 'Electronics',
-    price: 0,
-    stock: 0,
-    status: 'active' as 'active' | 'inactive'
-  };
-
   constructor(
     private dashboardService: DashboardService,
     private notificationService: NotificationService
   ) {}
 
+  ngOnInit(): void {
+    this.loadProducts();
+  }
+
   private loadProducts(): void {
-    this.dashboardService.getProducts(this.currentPage(), this.itemsPerPage()).subscribe((response: PaginatedResponse<Product>) => {
-      this.products.set(response.data);
-      this.paginationData.set({
-        page: response.page,
-        limit: response.limit,
-        total: response.total
+    this.dashboardService.getProducts(this.currentPage(), this.itemsPerPage())
+      .subscribe((res: PaginatedResponse<Product>) => {
+        this.products.set(res.data);
+        this.paginationData.set(res);
+        this.applyFilters();
       });
-      this.applyFilters();
-    });
   }
 
   private applyFilters(): void {
     let filtered = this.products();
 
     if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        p.category.toLowerCase().includes(query)
+      const q = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
       );
     }
 
@@ -396,17 +339,9 @@ export class ProductsComponent implements OnInit {
     this.displayedProducts.set(filtered);
   }
 
-  onSearch(): void {
-    this.applyFilters();
-  }
-
-  onCategoryFilterChange(): void {
-    this.applyFilters();
-  }
-
-  onStatusFilterChange(): void {
-    this.applyFilters();
-  }
+  onSearch() { this.applyFilters(); }
+  onCategoryFilterChange() { this.applyFilters(); }
+  onStatusFilterChange() { this.applyFilters(); }
 
   openCreateModal(): void {
     this.editingProduct.set(null);
@@ -427,29 +362,30 @@ export class ProductsComponent implements OnInit {
 
   saveProduct(): void {
     if (!this.formData.name || this.formData.price <= 0) {
-      this.notificationService.error('Please fill in all required fields correctly');
+      this.notificationService.error('Invalid input');
       return;
     }
 
-    this.notificationService.success(
-      `Product ${this.editingProduct() ? 'updated' : 'created'} successfully`
-    );
-    this.closeModal();
-    this.loadProducts();
+    this.isSaving.set(true);
+
+    setTimeout(() => {
+      this.notificationService.success('Saved successfully');
+      this.isSaving.set(false);
+      this.closeModal();
+      this.loadProducts();
+    }, 800);
   }
 
   deleteProduct(product: Product): void {
-    if (confirm(`Are you sure you want to delete ${product.name}?`)) {
-      this.notificationService.success('Product deleted successfully');
+    if (confirm(`Delete ${product.name}?`)) {
+      this.notificationService.success('Deleted');
       this.loadProducts();
     }
   }
 
   goToNextPage(): void {
-    if (this.paginationData().page * this.paginationData().limit < this.paginationData().total) {
-      this.currentPage.update(p => p + 1);
-      this.loadProducts();
-    }
+    this.currentPage.update(p => p + 1);
+    this.loadProducts();
   }
 
   goToPreviousPage(): void {

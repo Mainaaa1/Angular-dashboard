@@ -22,12 +22,14 @@ import { PaginatedResponse, User } from '@core/models';
 
       <div class="filters-bar">
         <input type="text" [(ngModel)]="searchQuery" (input)="onSearch()" placeholder="Search users..." class="search-input">
+
         <select [(ngModel)]="roleFilter" (change)="onRoleFilterChange()" class="filter-select">
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
           <option value="editor">Editor</option>
           <option value="user">User</option>
         </select>
+
         <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange()" class="filter-select">
           <option value="">All Status</option>
           <option value="active">Active</option>
@@ -39,15 +41,15 @@ import { PaginatedResponse, User } from '@core/models';
         [columns]="tableColumns"
         [data]="displayedUsers()"
         [pagination]="paginationData()"
-        (onEdit)="openEditModal(\$event)"
-        (onDelete)="deleteUser(\$event)"
+        (onEdit)="openEditModal($event)"
+        (onDelete)="deleteUser($event)"
         (onNextPage)="goToNextPage()"
         (onPreviousPage)="goToPreviousPage()">
       </app-data-table>
 
-      <!-- Create/Edit Modal -->
+      <!-- Modal -->
       <div *ngIf="isModalOpen()" class="modal-overlay" (click)="closeModal()">
-        <div class="modal" (click)="\$event.stopPropagation()">
+        <div class="modal" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>{{ editingUser() ? 'Edit User' : 'Add New User' }}</h2>
             <button class="modal-close" (click)="closeModal()">✕</button>
@@ -85,7 +87,9 @@ import { PaginatedResponse, User } from '@core/models';
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary">{{ editingUser() ? 'Update' : 'Create' }} User</button>
+              <button type="submit" class="btn btn-primary">
+                {{ editingUser() ? 'Update' : 'Create' }} User
+              </button>
             </div>
           </form>
         </div>
@@ -93,9 +97,7 @@ import { PaginatedResponse, User } from '@core/models';
     </div>
   `,
   styles: [`
-    .users-page {
-      animation: fadeIn 0.3s ease-in;
-    }
+    .users-page { animation: fadeIn 0.3s ease-in; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -117,9 +119,8 @@ import { PaginatedResponse, User } from '@core/models';
     }
 
     .page-subtitle {
-      margin: 0.5rem 0 0 0;
+      margin: 0.5rem 0 0;
       color: #718096;
-      font-size: 0.95rem;
     }
 
     .btn {
@@ -128,27 +129,16 @@ import { PaginatedResponse, User } from '@core/models';
       border-radius: 0.5rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
     .btn-secondary {
       background: #e2e8f0;
       color: #4a5568;
-    }
-
-    .btn-secondary:hover {
-      background: #cbd5e0;
     }
 
     .filters-bar {
@@ -160,98 +150,47 @@ import { PaginatedResponse, User } from '@core/models';
 
     .search-input,
     .filter-select {
-      padding: 0.75rem 1rem;
+      padding: 0.75rem;
       border: 1px solid #cbd5e0;
       border-radius: 0.5rem;
-      font-size: 0.9rem;
-      background: white;
-    }
-
-    .search-input {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .search-input:focus,
-    .filter-select:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      min-width: 180px;
     }
 
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      inset: 0;
+      background: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 2000;
-      animation: fadeIn 0.2s ease-in;
     }
 
     .modal {
       background: white;
       border-radius: 0.75rem;
-      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-      max-width: 500px;
       width: 90%;
-      animation: slideUp 0.3s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      max-width: 500px;
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
+      padding: 1rem;
       border-bottom: 1px solid #e2e8f0;
     }
 
-    .modal-header h2 {
-      margin: 0;
-      font-size: 1.25rem;
-      color: #2d3748;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #718096;
-      transition: color 0.2s ease;
-    }
-
-    .modal-close:hover {
-      color: #2d3748;
-    }
-
     .modal-body {
-      padding: 1.5rem;
+      padding: 1rem;
     }
 
     .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group:last-child {
-      margin-bottom: 0;
+      margin-bottom: 1rem;
     }
 
     .form-group label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
-      font-size: 0.9rem;
-      color: #4a5568;
     }
 
     .form-input {
@@ -259,14 +198,6 @@ import { PaginatedResponse, User } from '@core/models';
       padding: 0.75rem;
       border: 1px solid #cbd5e0;
       border-radius: 0.5rem;
-      font-size: 0.9rem;
-      box-sizing: border-box;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .form-row {
@@ -277,11 +208,10 @@ import { PaginatedResponse, User } from '@core/models';
 
     .modal-footer {
       display: flex;
-      gap: 1rem;
       justify-content: flex-end;
-      padding: 1.5rem;
+      gap: 1rem;
+      padding: 1rem;
       border-top: 1px solid #e2e8f0;
-      background: #f7fafc;
     }
 
     @media (max-width: 768px) {
@@ -290,25 +220,12 @@ import { PaginatedResponse, User } from '@core/models';
         gap: 1rem;
       }
 
-      .filters-bar {
-        flex-direction: column;
-      }
-
-      .search-input,
-      .filter-select {
-        width: 100%;
-      }
-
       .form-row {
         grid-template-columns: 1fr;
       }
 
-      .modal-footer {
+      .filters-bar {
         flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
       }
     }
   `]
@@ -324,22 +241,22 @@ export class UsersComponent implements OnInit {
   ];
 
   readonly users = signal<User[]>([]);
-  readonly currentPage = signal(1);
-  readonly itemsPerPage = signal(10);
-  readonly isModalOpen = signal(false);
-  readonly editingUser = signal<User | null>(null);
-  
   readonly displayedUsers = signal<User[]>([]);
   readonly paginationData = signal<any>(null);
+  readonly isModalOpen = signal(false);
+  readonly editingUser = signal<User | null>(null);
+  readonly currentPage = signal(1);
+  readonly itemsPerPage = signal(10);
 
   searchQuery = '';
   roleFilter = '';
   statusFilter = '';
-  formData = {
+
+  formData: Omit<User, 'id' | 'createdAt'> = {
     name: '',
     email: '',
-    role: 'user' as 'user' | 'admin' | 'editor',
-    status: 'active' as 'active' | 'inactive'
+    role: 'user',
+    status: 'active'
   };
 
   constructor(
@@ -352,50 +269,43 @@ export class UsersComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.userService.getUsers(this.currentPage(), this.itemsPerPage()).subscribe((response: PaginatedResponse<User>) => {
-      this.users.set(response.data);
-      this.paginationData.set({
-        page: response.page,
-        limit: response.limit,
-        total: response.total
+    this.userService.getUsers(this.currentPage(), this.itemsPerPage())
+      .subscribe((res: PaginatedResponse<User>) => {
+        this.users.set(res.data);
+        this.paginationData.set({
+          page: res.page,
+          limit: res.limit,
+          total: res.total
+        });
+        this.applyFilters();
       });
-      this.applyFilters();
-    });
   }
 
   private applyFilters(): void {
-    let filtered = this.users();
+    let data = this.users();
 
     if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(u => 
-        u.name.toLowerCase().includes(query) || 
-        u.email.toLowerCase().includes(query)
+      const q = this.searchQuery.toLowerCase();
+      data = data.filter(u =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q)
       );
     }
 
     if (this.roleFilter) {
-      filtered = filtered.filter(u => u.role === this.roleFilter);
+      data = data.filter(u => u.role === this.roleFilter);
     }
 
     if (this.statusFilter) {
-      filtered = filtered.filter(u => u.status === this.statusFilter);
+      data = data.filter(u => u.status === this.statusFilter);
     }
 
-    this.displayedUsers.set(filtered);
+    this.displayedUsers.set(data);
   }
 
-  onSearch(): void {
-    this.applyFilters();
-  }
-
-  onRoleFilterChange(): void {
-    this.applyFilters();
-  }
-
-  onStatusFilterChange(): void {
-    this.applyFilters();
-  }
+  onSearch(): void { this.applyFilters(); }
+  onRoleFilterChange(): void { this.applyFilters(); }
+  onStatusFilterChange(): void { this.applyFilters(); }
 
   openCreateModal(): void {
     this.editingUser.set(null);
@@ -405,7 +315,12 @@ export class UsersComponent implements OnInit {
 
   openEditModal(user: User): void {
     this.editingUser.set(user);
-    this.formData = { ...user };
+    this.formData = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status
+    };
     this.isModalOpen.set(true);
   }
 
@@ -416,44 +331,50 @@ export class UsersComponent implements OnInit {
 
   saveUser(): void {
     if (!this.formData.name || !this.formData.email) {
-      this.notificationService.error('Please fill in all required fields');
+      this.notificationService.error('Please fill required fields');
       return;
     }
 
+    const payload: Omit<User, 'id' | 'createdAt'> = { ...this.formData };
+
     if (this.editingUser()) {
-      this.userService.updateUser(this.editingUser()!.id, this.formData).subscribe(() => {
-        this.notificationService.success('User updated successfully');
-        this.closeModal();
-        this.loadUsers();
-      });
+      this.userService.updateUser(this.editingUser()!.id, payload)
+        .subscribe(() => {
+          this.notificationService.success('User updated successfully');
+          this.closeModal();
+          this.loadUsers();
+        });
     } else {
-      this.userService.createUser(this.formData).subscribe(() => {
-        this.notificationService.success('User created successfully');
-        this.closeModal();
-        this.loadUsers();
-      });
+      this.userService.createUser(payload)
+        .subscribe(() => {
+          this.notificationService.success('User created successfully');
+          this.closeModal();
+          this.loadUsers();
+        });
     }
   }
 
   deleteUser(user: User): void {
-    if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-      this.userService.deleteUser(user.id).subscribe(() => {
-        this.notificationService.success('User deleted successfully');
-        this.loadUsers();
-      });
+    if (confirm(`Delete ${user.name}?`)) {
+      this.userService.deleteUser(user.id)
+        .subscribe(() => {
+          this.notificationService.success('User deleted');
+          this.loadUsers();
+        });
     }
   }
 
   goToNextPage(): void {
-    if (this.paginationData().page * this.paginationData().limit < this.paginationData().total) {
-      this.currentPage.update(p => p + 1);
+    const p = this.paginationData();
+    if (p && p.page * p.limit < p.total) {
+      this.currentPage.update(v => v + 1);
       this.loadUsers();
     }
   }
 
   goToPreviousPage(): void {
     if (this.currentPage() > 1) {
-      this.currentPage.update(p => p - 1);
+      this.currentPage.update(v => v - 1);
       this.loadUsers();
     }
   }

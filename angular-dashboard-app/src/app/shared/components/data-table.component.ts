@@ -14,225 +14,228 @@ export interface TableColumn {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="table-container">
-      <table class="data-table">
-        <thead class="table-header">
-          <tr>
-            <th *ngFor="let column of columns()" [style.width]="column.width">
-              {{ column.label }}
-            </th>
-          </tr>
-        </thead>
-        <tbody class="table-body">
-          <tr *ngFor="let row of data(); let idx = index" class="table-row">
-            <td *ngFor="let column of columns()" [style.width]="column.width" (click)="onRowClick.emit(row)">
-              <span *ngIf="column.type === 'text'" class="cell-content">
-                {{ row[column.key] }}
-              </span>
-              <span *ngIf="column.type === 'date'" class="cell-content">
-                {{ formatDate(row[column.key]) }}
-              </span>
-              <span *ngIf="column.type === 'badge'" [class]="'badge badge-' + row[column.key]">
-                {{ row[column.key] }}
-              </span>
-              <span *ngIf="column.type === 'actions'" class="cell-actions">
-                <button class="action-btn edit-btn" title="Edit" (click)="onEdit.emit(row); $event.stopPropagation()">
-                  ✏️
-                </button>
-                <button class="action-btn delete-btn" title="Delete" (click)="onDelete.emit(row); $event.stopPropagation()">
-                  🗑️
-                </button>
-              </span>
-            </td>
-          </tr>
-          <tr *ngIf="data().length === 0" class="table-empty">
-            <td [attr.colspan]="columns().length" class="empty-state">
-              No data available
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="table-wrapper">
 
-    <div class="table-footer" *ngIf="pagination()">
-      <div class="pagination-info">
-        Showing {{ (pagination().page - 1) * pagination().limit + 1 }} to 
-        {{ Math.min(pagination().page * pagination().limit, pagination().total) }} of {{ pagination().total }}
+      <div class="table-container">
+
+        <table class="data-table">
+
+          <thead>
+            <tr>
+              <th *ngFor="let column of columns()" [style.width]="column.width">
+                {{ column.label }}
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let row of data(); let idx = index">
+
+              <td *ngFor="let column of columns()" (click)="onRowClick.emit(row)">
+
+                <!-- TEXT -->
+                <span *ngIf="column.type === 'text'">
+                  {{ row[column.key] }}
+                </span>
+
+                <!-- DATE -->
+                <span *ngIf="column.type === 'date'">
+                  {{ formatDate(row[column.key]) }}
+                </span>
+
+                <!-- BADGE -->
+                <span
+                  *ngIf="column.type === 'badge'"
+                  class="badge"
+                  [ngClass]="getBadgeClass(row[column.key])"
+                >
+                  {{ row[column.key] }}
+                </span>
+
+                <!-- ACTIONS -->
+                <div *ngIf="column.type === 'actions'" class="actions">
+                  <button class="btn-icon edit"
+                          (click)="onEdit.emit(row); $event.stopPropagation()">
+                    ✏
+                  </button>
+
+                  <button class="btn-icon delete"
+                          (click)="onDelete.emit(row); $event.stopPropagation()">
+                    🗑
+                  </button>
+                </div>
+
+              </td>
+
+            </tr>
+
+            <tr *ngIf="data().length === 0">
+              <td [attr.colspan]="columns().length" class="empty">
+                No records found
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
       </div>
-      <div class="pagination">
-        <button [disabled]="pagination().page === 1" (click)="onPreviousPage.emit()">← Previous</button>
-        <span class="page-number">Page {{ pagination().page }}</span>
-        <button [disabled]="pagination().page * pagination().limit >= pagination().total" (click)="onNextPage.emit()">Next →</button>
+
+      <!-- PAGINATION -->
+      <div class="footer" *ngIf="pagination() as p">
+
+        <div class="info">
+          Showing {{ (p.page - 1) * p.limit + 1 }}
+          to {{ Math.min(p.page * p.limit, p.total) }}
+          of {{ p.total }}
+        </div>
+
+        <div class="pager">
+          <button (click)="onPreviousPage.emit()" [disabled]="p.page === 1">
+            Prev
+          </button>
+
+          <span>Page {{ p.page }}</span>
+
+          <button
+            (click)="onNextPage.emit()"
+            [disabled]="p.page * p.limit >= p.total"
+          >
+            Next
+          </button>
+        </div>
+
       </div>
+
     </div>
   `,
   styles: [`
+    .table-wrapper {
+      width: 100%;
+    }
+
     .table-container {
-      background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
       overflow-x: auto;
     }
 
     .data-table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 600px;
     }
 
-    .table-header {
-      background: #f7fafc;
-      border-bottom: 2px solid #e2e8f0;
+    thead {
+      position: sticky;
+      top: 0;
+      background: #f9fafb;
+      z-index: 1;
     }
 
-    .table-header th {
-      padding: 1rem;
+    th {
       text-align: left;
-      font-weight: 600;
-      color: #4a5568;
-      font-size: 0.85rem;
+      padding: 14px;
+      font-size: 12px;
       text-transform: uppercase;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
       letter-spacing: 0.05em;
     }
 
-    .table-body tr {
-      border-bottom: 1px solid #e2e8f0;
-      transition: background-color 0.2s ease;
+    td {
+      padding: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+      color: #374151;
+      vertical-align: middle;
     }
 
-    .table-body tr:hover {
-      background-color: #f7fafc;
+    tr:hover td {
+      background: #f9fafb;
     }
 
-    .table-row.clickable {
-      cursor: pointer;
-    }
-
-    .table-body td {
-      padding: 1rem;
-      color: #4a5568;
-      font-size: 0.9rem;
-    }
-
-    .cell-content {
-      display: block;
-    }
-
-    .cell-actions {
+    .actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 8px;
     }
 
-    .action-btn {
-      background: none;
+    .btn-icon {
       border: none;
+      background: transparent;
       cursor: pointer;
-      padding: 0.25rem 0.5rem;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-      border-radius: 0.25rem;
+      padding: 6px;
+      border-radius: 6px;
+      transition: 0.2s;
     }
 
-    .action-btn:hover {
-      background: rgba(0, 0, 0, 0.05);
+    .btn-icon:hover {
+      background: #f3f4f6;
     }
 
-    .edit-btn {
-      color: #3b82f6;
-    }
-
-    .delete-btn {
-      color: #ef4444;
-    }
+    .edit { color: #2563eb; }
+    .delete { color: #dc2626; }
 
     .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 0.25rem;
-      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
       font-weight: 600;
-      text-transform: capitalize;
+      display: inline-block;
     }
 
-    .badge-active,
-    .badge-success {
-      background: #d1fae5;
-      color: #065f46;
-    }
+    .b-active { background: #dcfce7; color: #166534; }
+    .b-inactive { background: #fee2e2; color: #991b1b; }
+    .b-admin { background: #ede9fe; color: #5b21b6; }
+    .b-user { background: #e0f2fe; color: #075985; }
+    .b-editor { background: #fff7ed; color: #9a3412; }
 
-    .badge-inactive {
-      background: #fee2e2;
-      color: #7f1d1d;
-    }
-
-    .badge-editor {
-      background: #dbeafe;
-      color: #1e3a8a;
-    }
-
-    .badge-admin {
-      background: #fce7f3;
-      color: #831843;
-    }
-
-    .badge-user {
-      background: #f3e8ff;
-      color: #4c1d95;
-    }
-
-    .table-empty {
+    .empty {
       text-align: center;
+      padding: 30px;
+      color: #9ca3af;
     }
 
-    .empty-state {
-      padding: 2rem !important;
-      color: #a0aec0;
-      font-size: 0.95rem;
-    }
-
-    .table-footer {
+    .footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
-      border-top: 1px solid #e2e8f0;
-      background: #f7fafc;
+      padding: 12px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .pagination-info {
-      font-size: 0.85rem;
-      color: #718096;
-    }
-
-    .pagination {
+    .pager {
       display: flex;
-      gap: 0.75rem;
+      gap: 10px;
       align-items: center;
     }
 
-    .pagination button {
-      padding: 0.5rem 1rem;
-      border: 1px solid #cbd5e0;
+    .pager button {
+      border: 1px solid #e5e7eb;
       background: white;
-      border-radius: 0.25rem;
+      padding: 6px 12px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s ease;
     }
 
-    .pagination button:hover:not(:disabled) {
-      background: #edf2f7;
-    }
-
-    .pagination button:disabled {
+    .pager button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
-    .page-number {
-      font-size: 0.85rem;
-      color: #4a5568;
-      font-weight: 600;
+    @media (max-width: 768px) {
+      td, th {
+        padding: 10px;
+        font-size: 13px;
+      }
+
+      .footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   `]
 })
@@ -249,16 +252,21 @@ export class DataTableComponent {
 
   Math = Math;
 
+  getBadgeClass(value: string): string {
+    if (!value) return '';
+    return 'b-' + value.toString().toLowerCase().replace(/\s+/g, '');
+  }
+
   formatDate(date: any): string {
     if (!date) return '';
     try {
-      return new Date(date).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return new Date(date).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
       });
     } catch {
-      return date;
+      return String(date);
     }
   }
 }

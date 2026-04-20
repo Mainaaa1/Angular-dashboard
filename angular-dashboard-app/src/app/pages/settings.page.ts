@@ -10,404 +10,280 @@ import { NotificationService } from '@core/services/notification.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="settings-page">
+
+      <!-- Header -->
       <div class="page-header">
         <h1 class="page-title">Settings</h1>
-        <p class="page-subtitle">Manage your preferences and account settings</p>
+        <p class="page-subtitle">Manage your account and preferences</p>
       </div>
 
-      <div class="settings-container">
-        <!-- Profile Settings -->
-        <div class="settings-card">
-          <div class="card-header">
-            <h2 class="card-title">👤 Profile Settings</h2>
+      <!-- Grid Layout -->
+      <div class="settings-grid">
+
+        <!-- Profile -->
+        <div class="card">
+          <h3 class="card-title">Profile</h3>
+
+          <div class="form-group">
+            <label>Name</label>
+            <input class="input" [value]="user()?.name" readonly>
           </div>
 
-          <form class="settings-form">
-            <div class="form-group">
-              <label>Full Name</label>
-              <input type="text" value="{{ user()?.name || '' }}" class="form-input" readonly>
-            </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input class="input" [value]="user()?.email" readonly>
+          </div>
 
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" value="{{ user()?.email || '' }}" class="form-input" readonly>
-            </div>
+          <div class="form-group">
+            <label>Role</label>
+            <input class="input" [value]="user()?.role" readonly>
+          </div>
 
-            <div class="form-group">
-              <label>Role</label>
-              <input type="text" [value]="(user()?.role || '').toUpperCase()" class="form-input" readonly>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" (click)="showProfileEditNotification()">Edit Profile</button>
-            </div>
-          </form>
+          <button class="btn-secondary" (click)="showProfileEditNotification()">
+            Edit Profile
+          </button>
         </div>
 
-        <!-- Notification Preferences -->
-        <div class="settings-card">
-          <div class="card-header">
-            <h2 class="card-title">🔔 Notifications</h2>
+        <!-- Notifications -->
+        <div class="card">
+          <h3 class="card-title">Notifications</h3>
+
+          <div class="setting">
+            <div>
+              <p>Email Notifications</p>
+              <small>Receive updates via email</small>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="settings.emailNotifications">
+              <span></span>
+            </label>
           </div>
 
-          <div class="notification-settings">
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Email Notifications</p>
-                <p class="setting-description">Receive important updates via email</p>
-              </div>
-              <input type="checkbox" [(ngModel)]="settings.emailNotifications" class="toggle-input">
+          <div class="setting">
+            <div>
+              <p>Push Notifications</p>
+              <small>Browser push alerts</small>
             </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Push Notifications</p>
-                <p class="setting-description">Receive push notifications</p>
-              </div>
-              <input type="checkbox" [(ngModel)]="settings.pushNotifications" class="toggle-input">
-            </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Daily Summary</p>
-                <p class="setting-description">Get a daily summary of your activities</p>
-              </div>
-              <input type="checkbox" [(ngModel)]="settings.dailySummary" class="toggle-input">
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-primary" (click)="saveNotificationSettings()">Save Settings</button>
-            </div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="settings.pushNotifications">
+              <span></span>
+            </label>
           </div>
+
+          <button class="btn-primary" [disabled]="isSaving()" (click)="saveNotificationSettings()">
+            <span *ngIf="!isSaving()">Save</span>
+            <span *ngIf="isSaving()" class="spinner"></span>
+          </button>
         </div>
 
-        <!-- Security Settings -->
-        <div class="settings-card">
-          <div class="card-header">
-            <h2 class="card-title">🔒 Security</h2>
+        <!-- Appearance -->
+        <div class="card">
+          <h3 class="card-title">Appearance</h3>
+
+          <div class="form-group">
+            <label>Theme</label>
+            <select [(ngModel)]="settings.theme" class="input">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
           </div>
 
-          <div class="security-settings">
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Two-Factor Authentication</p>
-                <p class="setting-description">Add an extra layer of security to your account</p>
-              </div>
-              <button class="btn btn-secondary btn-sm">Enable 2FA</button>
-            </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Change Password</p>
-                <p class="setting-description">Update your password regularly</p>
-              </div>
-              <button class="btn btn-secondary btn-sm" (click)="openChangePasswordModal()">Change</button>
-            </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <p class="setting-label">Active Sessions</p>
-                <p class="setting-description">Manage your active sessions</p>
-              </div>
-              <button class="btn btn-secondary btn-sm">View Sessions</button>
-            </div>
+          <div class="form-group">
+            <label>Language</label>
+            <select [(ngModel)]="settings.language" class="input">
+              <option value="en">English</option>
+              <option value="fr">French</option>
+            </select>
           </div>
+
+          <button class="btn-primary" (click)="saveAppearanceSettings()">
+            Save Preferences
+          </button>
         </div>
 
-        <!-- Appearance Settings -->
-        <div class="settings-card">
-          <div class="card-header">
-            <h2 class="card-title">🎨 Appearance</h2>
-          </div>
+        <!-- Security -->
+        <div class="card">
+          <h3 class="card-title">Security</h3>
 
-          <div class="appearance-settings">
-            <div class="form-group">
-              <label>Theme</label>
-              <select [(ngModel)]="settings.theme" class="form-input">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="auto">Auto (System)</option>
-              </select>
-            </div>
+          <button class="btn-secondary" (click)="openChangePasswordModal()">
+            Change Password
+          </button>
 
-            <div class="form-group">
-              <label>Language</label>
-              <select [(ngModel)]="settings.language" class="form-input">
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-              </select>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-primary" (click)="saveAppearanceSettings()">Save Preferences</button>
-            </div>
-          </div>
+          <button class="btn-secondary">
+            Enable 2FA
+          </button>
         </div>
 
         <!-- Danger Zone -->
-        <div class="settings-card danger-zone">
-          <div class="card-header">
-            <h2 class="card-title">⚠️ Danger Zone</h2>
-          </div>
+        <div class="card danger">
+          <h3 class="card-title">Danger Zone</h3>
 
-          <div class="danger-actions">
-            <div class="danger-item">
-              <div class="danger-info">
-                <p class="danger-label">Delete Account</p>
-                <p class="danger-description">Permanently delete your account and all associated data</p>
-              </div>
-              <button class="btn btn-danger" (click)="confirmDeleteAccount()">Delete</button>
-            </div>
+          <button class="btn-danger" (click)="confirmDeleteAccount()">
+            Delete Account
+          </button>
 
-            <div class="danger-item">
-              <div class="danger-info">
-                <p class="danger-label">Sign Out</p>
-                <p class="danger-description">Sign out from your account</p>
-              </div>
-              <button class="btn btn-danger" (click)="signOut()">Sign Out</button>
-            </div>
-          </div>
+          <button class="btn-danger outline" (click)="signOut()">
+            Sign Out
+          </button>
         </div>
+
       </div>
     </div>
   `,
   styles: [`
     .settings-page {
-      animation: fadeIn 0.3s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .page-header {
-      margin-bottom: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
     }
 
     .page-title {
-      margin: 0;
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 700;
-      color: #2d3748;
     }
 
     .page-subtitle {
-      margin: 0.5rem 0 0 0;
-      color: #718096;
-      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
     }
 
-    .settings-container {
+    .settings-grid {
       display: grid;
-      gap: 1.5rem;
-      max-width: 700px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
     }
 
-    .settings-card {
+    .card {
       background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-    }
-
-    .settings-card.danger-zone {
-      border-color: #fee2e2;
-      background: #fef2f2;
-    }
-
-    .card-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid #e2e8f0;
-      background: #f7fafc;
-    }
-
-    .settings-card.danger-zone .card-header {
-      background: #fee2e2;
+      padding: 1.25rem;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .card-title {
-      margin: 0;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
-      color: #2d3748;
     }
 
-    .settings-form {
-      padding: 1.5rem;
+    .input {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
     }
 
     .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #cbd5e0;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-      box-sizing: border-box;
-      background: white;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .form-actions {
-      margin-top: 1.5rem;
       display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #4f46e5;
       color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: none;
     }
 
     .btn-secondary {
       background: #e2e8f0;
-      color: #4a5568;
-    }
-
-    .btn-secondary:hover {
-      background: #cbd5e0;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: none;
     }
 
     .btn-danger {
       background: #ef4444;
       color: white;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: none;
     }
 
-    .btn-danger:hover {
-      background: #dc2626;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    .btn-danger.outline {
+      background: transparent;
+      border: 1px solid #ef4444;
+      color: #ef4444;
     }
 
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
+    .danger {
+      border-color: #fecaca;
+      background: #fef2f2;
     }
 
-    .notification-settings,
-    .security-settings,
-    .danger-actions {
-      padding: 1.5rem;
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
     }
 
-    .setting-item,
-    .danger-item {
+    .switch input {
+      display: none;
+    }
+
+    .switch span {
+      position: absolute;
+      inset: 0;
+      background: #cbd5e1;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .switch span::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .switch input:checked + span {
+      background: #4f46e5;
+    }
+
+    .switch input:checked + span::before {
+      transform: translateX(18px);
+    }
+
+    .setting {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.25rem;
-      border-bottom: 1px solid #e2e8f0;
-      gap: 1rem;
     }
 
-    .settings-card.danger-zone .setting-item,
-    .settings-card.danger-zone .danger-item {
-      border-bottom-color: #fecaca;
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
     }
 
-    .setting-item:last-child,
-    .danger-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .setting-info,
-    .danger-info {
-      flex: 1;
-    }
-
-    .setting-label,
-    .danger-label {
-      margin: 0;
-      font-weight: 600;
-      color: #2d3748;
-      font-size: 0.9rem;
-    }
-
-    .setting-description,
-    .danger-description {
-      margin: 0.25rem 0 0 0;
-      color: #718096;
-      font-size: 0.85rem;
-    }
-
-    .settings-card.danger-zone .danger-description {
-      color: #b91c1c;
-    }
-
-    .toggle-input {
-      width: 3rem;
-      height: 1.5rem;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .appearance-settings {
-      padding: 1.5rem;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     @media (max-width: 768px) {
-      .page-title {
-        font-size: 1.5rem;
-      }
-
-      .setting-item,
-      .danger-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .form-actions {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
+      .settings-grid {
+        grid-template-columns: 1fr;
       }
     }
   `]
 })
 export class SettingsComponent {
+
+  readonly isSaving = signal(false);
+
   get user() {
     return this.authService.user;
   }
@@ -426,29 +302,34 @@ export class SettingsComponent {
   ) {}
 
   saveNotificationSettings(): void {
-    this.notificationService.success('Notification preferences updated');
+    this.isSaving.set(true);
+
+    setTimeout(() => {
+      this.notificationService.success('Saved');
+      this.isSaving.set(false);
+    }, 800);
   }
 
   saveAppearanceSettings(): void {
-    this.notificationService.success('Appearance settings updated');
+    this.notificationService.success('Updated');
   }
 
   openChangePasswordModal(): void {
-    this.notificationService.info('Password change feature coming soon');
+    this.notificationService.info('Coming soon');
   }
 
   showProfileEditNotification(): void {
-    this.notificationService.info('Profile editing feature coming soon');
+    this.notificationService.info('Coming soon');
   }
 
   confirmDeleteAccount(): void {
-    if (confirm('Are you sure? This action cannot be undone.')) {
-      this.notificationService.success('Account deletion request submitted');
+    if (confirm('This cannot be undone')) {
+      this.notificationService.success('Request sent');
     }
   }
 
   signOut(): void {
     this.authService.logout();
-    this.notificationService.success('Signed out successfully');
+    this.notificationService.success('Signed out');
   }
 }

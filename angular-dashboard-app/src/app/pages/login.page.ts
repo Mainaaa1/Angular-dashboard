@@ -12,225 +12,201 @@ import { AuthState } from '@core/models';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="login-container">
+
+      <!-- Card -->
       <div class="login-box">
+
+        <!-- Brand -->
         <div class="login-brand">
           <div class="brand-icon">📊</div>
           <h1 class="brand-name">Dashboard</h1>
         </div>
 
+        <!-- Form -->
         <form (ngSubmit)="onLogin()" class="login-form">
-          <h2 class="login-title">Welcome Back</h2>
-          <p class="login-subtitle">Sign in to your account to continue</p>
+          <h2 class="login-title">Welcome back</h2>
+          <p class="login-subtitle">Sign in to continue</p>
 
           <div class="form-group">
-            <label for="email">Email Address</label>
+            <label>Email</label>
             <input 
-              id="email"
-              type="email" 
-              [(ngModel)]="email" 
-              name="email" 
-              placeholder="admin@example.com"
-              required 
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="you@example.com"
+              required
               class="form-input"
-              [disabled]="isLoading()">
+              [disabled]="isLoading()"
+            />
           </div>
 
           <div class="form-group">
-            <label for="password">Password</label>
+            <label>Password</label>
             <input 
-              id="password"
-              type="password" 
-              [(ngModel)]="password" 
-              name="password" 
+              type="password"
+              [(ngModel)]="password"
+              name="password"
               placeholder="••••••••"
-              required 
+              required
               class="form-input"
-              [disabled]="isLoading()">
+              [disabled]="isLoading()"
+            />
           </div>
 
-          <div class="form-group checkbox">
-            <input type="checkbox" id="remember" [(ngModel)]="rememberMe" name="rememberMe" class="checkbox-input">
-            <label for="remember">Remember me</label>
+          <div class="form-row">
+            <label class="checkbox">
+              <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+              <span>Remember me</span>
+            </label>
+
+            <a class="forgot-link">Forgot password?</a>
           </div>
 
-          <button type="submit" class="btn btn-login" [disabled]="isLoading()">
+          <button type="submit" class="btn-login" [disabled]="isLoading()">
             {{ isLoading() ? 'Signing in...' : 'Sign In' }}
           </button>
         </form>
 
+        <!-- Footer -->
         <div class="login-footer">
-          <p class="demo-note">Demo Credentials:<br>Email: any@email.com | Password: any</p>
+          <p>Demo: any@email.com / any</p>
         </div>
-      </div>
 
-      <div class="login-background">
-        <div class="background-shape shape-1"></div>
-        <div class="background-shape shape-2"></div>
-        <div class="background-shape shape-3"></div>
       </div>
     </div>
   `,
   styles: [`
     .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .background-shape {
-      position: absolute;
-      opacity: 0.1;
-      border-radius: 50%;
-    }
-
-    .shape-1 {
-      width: 500px;
-      height: 500px;
-      background: white;
-      top: -100px;
-      left: -100px;
-    }
-
-    .shape-2 {
-      width: 300px;
-      height: 300px;
-      background: white;
-      bottom: -50px;
-      right: 10%;
-    }
-
-    .shape-3 {
-      width: 200px;
-      height: 200px;
-      background: white;
-      top: 50%;
-      right: -50px;
+      display: grid;
+      place-items: center;
+      background: #f8fafc;
+      padding: 1rem;
     }
 
     .login-box {
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-      padding: 3rem;
       width: 100%;
-      max-width: 420px;
-      z-index: 10;
-      animation: slideUp 0.5s ease-out;
+      max-width: 400px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      animation: fadeIn 0.4s ease;
     }
 
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Brand */
     .login-brand {
       text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .brand-icon {
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .brand-name {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2d3748;
-    }
-
-    .login-title {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2d3748;
-      text-align: center;
-    }
-
-    .login-subtitle {
-      margin: 0 0 1.5rem 0;
-      color: #718096;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    .login-form {
       margin-bottom: 1.5rem;
     }
 
-    .form-group {
-      margin-bottom: 1.25rem;
+    .brand-icon {
+      font-size: 2rem;
+      margin-bottom: 0.25rem;
     }
 
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* Titles */
+    .login-title {
+      text-align: center;
+      font-size: 1.25rem;
       font-weight: 600;
-      font-size: 0.9rem;
-      color: #4a5568;
+      margin-bottom: 0.25rem;
+      color: #1e293b;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #334155;
     }
 
     .form-input {
       width: 100%;
-      padding: 0.75rem 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 0.5rem;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-      transition: all 0.3s ease;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
     }
 
     .form-input:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
     }
 
     .form-input:disabled {
-      background: #f7fafc;
-      color: #a0aec0;
+      background: #f1f5f9;
+    }
+
+    /* Row */
+    .form-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      margin: 0.75rem 0 1.25rem;
     }
 
     .checkbox {
       display: flex;
       align-items: center;
-      font-size: 0.9rem;
-      margin-bottom: 2rem;
-    }
-
-    .checkbox-input {
-      width: 1rem;
-      height: 1rem;
-      margin-right: 0.5rem;
+      gap: 0.4rem;
       cursor: pointer;
     }
 
-    .btn {
-      width: 100%;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: 600;
+    .forgot-link {
+      color: #4f46e5;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
+      text-decoration: none;
     }
 
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Button */
     .btn-login {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: none;
+      background: #4f46e5;
       color: white;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
     .btn-login:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      background: #4338ca;
     }
 
     .btn-login:disabled {
@@ -238,33 +214,21 @@ import { AuthState } from '@core/models';
       cursor: not-allowed;
     }
 
+    /* Footer */
     .login-footer {
+      margin-top: 1.25rem;
+      font-size: 0.75rem;
       text-align: center;
-      font-size: 0.8rem;
-      color: #a0aec0;
-      background: #f7fafc;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      border: 1px dashed #cbd5e0;
+      color: #94a3b8;
+      background: #f1f5f9;
+      padding: 0.75rem;
+      border-radius: 8px;
     }
 
-    .demo-note {
-      margin: 0;
-      line-height: 1.6;
-    }
-
+    /* Mobile */
     @media (max-width: 480px) {
       .login-box {
-        padding: 2rem;
-        margin: 1rem;
-      }
-
-      .login-title {
-        font-size: 1.25rem;
-      }
-
-      .button-group {
-        flex-direction: column;
+        padding: 1.5rem;
       }
     }
   `]
@@ -282,7 +246,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // If already authenticated, redirect to dashboard
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
@@ -295,6 +258,7 @@ export class LoginComponent implements OnInit {
     }
 
     this.isLoading.set(true);
+
     this.authService.login(this.email, this.password).subscribe({
       next: (authState: AuthState) => {
         this.authService.setAuthState(authState);

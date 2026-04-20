@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DashboardService } from '@core/services/dashboard.service';
 import { NotificationService } from '@core/services/notification.service';
 import { MetricCardComponent } from '@shared/components/metric-card.component';
-import { DashboardMetrics, AnalyticsData } from '@core/models';
+import { DashboardMetrics } from '@core/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,32 +12,46 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
   imports: [CommonModule, FormsModule, MetricCardComponent],
   template: `
     <div class="dashboard">
+      <!-- Header -->
       <div class="dashboard-header">
         <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Welcome back! Here's what's happening with your business today.</p>
+        <p class="page-subtitle">
+          Welcome back! Here's what's happening with your business today.
+        </p>
       </div>
 
-      <!-- Metrics Row -->
+      <!-- Metrics -->
       <div class="metrics-grid">
-        <app-metric-card #card1 [attr.data-icon]="'📊'" [attr.data-title]="'Users'" 
-          [attr.data-value]="(metrics()?.totalUsers || '0') + ''" 
-          [attr.data-change]="(metrics()?.usersChange || 0) + ''">
-        </app-metric-card>
-        <app-metric-card #card2 [attr.data-icon]="'💰'" [attr.data-title]="'Revenue'" 
-          [attr.data-value]="'$' + (metrics()?.totalRevenue || 0)" 
-          [attr.data-change]="(metrics()?.revenueChange || 0) + ''">
-        </app-metric-card>
-        <app-metric-card #card3 [attr.data-icon]="'📦'" [attr.data-title]="'Orders'" 
-          [attr.data-value]="(metrics()?.totalOrders || '0') + ''" 
-          [attr.data-change]="'2.5'">
-        </app-metric-card>
-        <app-metric-card #card4 [attr.data-icon]="'📈'" [attr.data-title]="'Growth'" 
-          [attr.data-value]="(metrics()?.growthRate || '0') + '%'" 
-          [attr.data-change]="'1.8'">
-        </app-metric-card>
+        <app-metric-card
+          [attr.data-icon]="'📊'"
+          [attr.data-title]="'Users'"
+          [attr.data-value]="(metrics()?.totalUsers || 0) + ''"
+          [attr.data-change]="(metrics()?.usersChange || 0) + ''"
+        ></app-metric-card>
+
+        <app-metric-card
+          [attr.data-icon]="'💰'"
+          [attr.data-title]="'Revenue'"
+          [attr.data-value]="'$' + (metrics()?.totalRevenue || 0)"
+          [attr.data-change]="(metrics()?.revenueChange || 0) + ''"
+        ></app-metric-card>
+
+        <app-metric-card
+          [attr.data-icon]="'📦'"
+          [attr.data-title]="'Orders'"
+          [attr.data-value]="(metrics()?.totalOrders || 0) + ''"
+          [attr.data-change]="'2.5'"
+        ></app-metric-card>
+
+        <app-metric-card
+          [attr.data-icon]="'📈'"
+          [attr.data-title]="'Growth'"
+          [attr.data-value]="(metrics()?.growthRate || 0) + '%'"
+          [attr.data-change]="'1.8'"
+        ></app-metric-card>
       </div>
 
-      <!-- Charts Row -->
+      <!-- Charts Row 1 -->
       <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-header">
@@ -48,6 +62,7 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
               <option value="yearly">Yearly</option>
             </select>
           </div>
+
           <div class="chart-placeholder">
             <div class="chart-bar" style="height: 40%"></div>
             <div class="chart-bar" style="height: 60%"></div>
@@ -62,44 +77,44 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
           <div class="chart-header">
             <h3 class="chart-title">User Activity</h3>
           </div>
-          <div class="chart-placeholder">
-            <div class="chart-line">
-              <svg viewBox="0 0 300 150" class="line-chart">
-                <polyline fill="none" stroke="#3b82f6" stroke-width="2" 
-                  points="0,120 50,100 100,80 150,60 200,40 250,20 300,10"/>
-              </svg>
-            </div>
+
+          <div class="chart-placeholder line">
+            <svg viewBox="0 0 300 150" class="line-chart">
+              <polyline
+                fill="none"
+                stroke="#4f46e5"
+                stroke-width="2"
+                points="0,120 50,100 100,80 150,60 200,40 250,20 300,10"
+              />
+            </svg>
           </div>
         </div>
       </div>
 
+      <!-- Charts Row 2 -->
       <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-header">
             <h3 class="chart-title">Sales by Category</h3>
           </div>
-          <div class="chart-placeholder">
-            <div class="pie-segments">
-              <div class="pie-segment" style="background: #3b82f6; flex: 28"></div>
-              <div class="pie-segment" style="background: #10b981; flex: 22"></div>
-              <div class="pie-segment" style="background: #f59e0b; flex: 18"></div>
-              <div class="pie-segment" style="background: #ef4444; flex: 15"></div>
-              <div class="pie-segment" style="background: #8b5cf6; flex: 17"></div>
-            </div>
-          </div>
+
+          <div class="pie-wrapper"></div>
         </div>
 
         <div class="activity-card">
           <div class="activity-header">
             <h3 class="chart-title">Recent Activity</h3>
           </div>
+
           <div class="activity-list">
             <div *ngFor="let activity of recentActivities()" class="activity-item">
               <span class="activity-indicator" [class]="'activity-' + activity.type"></span>
+
               <div class="activity-content">
                 <p class="activity-action">{{ activity.action }}</p>
                 <p class="activity-user">by {{ activity.user }}</p>
               </div>
+
               <span class="activity-time">{{ formatTime(activity.timestamp) }}</span>
             </div>
           </div>
@@ -109,6 +124,9 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
   `,
   styles: [`
     .dashboard {
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
       animation: fadeIn 0.3s ease-in;
     }
 
@@ -122,97 +140,85 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
     }
 
     .page-title {
-      margin: 0;
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 700;
-      color: #2d3748;
+      color: #1a202c;
     }
 
     .page-subtitle {
-      margin: 0.5rem 0 0 0;
-      color: #718096;
+      color: #64748b;
       font-size: 0.95rem;
+      margin-top: 0.5rem;
     }
 
+    /* Metrics */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
       margin-bottom: 2rem;
     }
 
+    /* Charts */
     .charts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
 
     .chart-card,
     .activity-card {
-      background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      padding: 1.5rem;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 1.25rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: 0.2s;
+    }
+
+    .chart-card:hover,
+    .activity-card:hover {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
 
     .chart-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .chart-title {
-      margin: 0;
       font-size: 1rem;
       font-weight: 600;
-      color: #2d3748;
     }
 
     .chart-select {
-      padding: 0.5rem 1rem;
-      border: 1px solid #cbd5e0;
-      border-radius: 0.25rem;
-      background: white;
-      cursor: pointer;
-      font-size: 0.85rem;
-      color: #4a5568;
-    }
-
-    .chart-select:hover {
-      border-color: #a0aec0;
-    }
-
-    .chart {
-      max-height: 300px;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
     }
 
     .chart-placeholder {
-      height: 300px;
+      height: 220px;
       display: flex;
-      align-items: end;
-      justify-content: space-around;
-      padding: 20px;
-      background: linear-gradient(to top, #f7fafc 0%, #edf2f7 100%);
+      align-items: flex-end;
+      gap: 8px;
+      padding: 1rem;
+      background: #f8fafc;
       border-radius: 8px;
     }
 
+    .chart-placeholder.line {
+      align-items: center;
+      justify-content: center;
+    }
+
     .chart-bar {
-      width: 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 4px 4px 0 0;
-      transition: all 0.3s ease;
-    }
-
-    .chart-bar:hover {
-      transform: scaleY(1.1);
-    }
-
-    .chart-line {
-      width: 100%;
-      height: 100%;
+      flex: 1;
+      background: linear-gradient(180deg, #6366f1, #4f46e5);
+      border-radius: 6px 6px 0 0;
     }
 
     .line-chart {
@@ -220,109 +226,64 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
       height: 100%;
     }
 
-    .pie-segments {
-      display: flex;
-      height: 200px;
+    /* Pie */
+    .pie-wrapper {
+      width: 180px;
+      height: 180px;
+      margin: auto;
       border-radius: 50%;
-      overflow: hidden;
-      margin: 50px auto;
-      width: 200px;
+      background: conic-gradient(
+        #3b82f6 0% 28%,
+        #10b981 28% 50%,
+        #f59e0b 50% 68%,
+        #ef4444 68% 83%,
+        #8b5cf6 83% 100%
+      );
     }
 
-    .pie-segment {
-      height: 100%;
-      transition: all 0.3s ease;
-    }
-
-    .pie-segment:hover {
-      transform: scale(1.05);
-    }
-
-    .activity-card {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .activity-header {
-      margin-bottom: 1.5rem;
-    }
-
+    /* Activity */
     .activity-list {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .activity-item {
       display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1rem;
-      background: #f7fafc;
-      border-radius: 0.5rem;
-      transition: all 0.2s ease;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 8px;
     }
 
     .activity-item:hover {
-      background: #edf2f7;
+      background: #f1f5f9;
     }
 
     .activity-indicator {
-      width: 3rem;
-      height: 3rem;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
     }
 
-    .activity-create {
-      background: #d1fae5;
-      color: #065f46;
-    }
+    .activity-create { background: #10b981; }
+    .activity-update { background: #3b82f6; }
+    .activity-delete { background: #ef4444; }
+    .activity-export { background: #f59e0b; }
 
-    .activity-update {
-      background: #bfdbfe;
-      color: #1e3a8a;
-    }
-
-    .activity-delete {
-      background: #fee2e2;
-      color: #7f1d1d;
-    }
-
-    .activity-export {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .activity-content {
-      flex: 1;
-    }
-
-    .activity-action {
-      margin: 0;
-      font-weight: 600;
-      color: #2d3748;
-      font-size: 0.9rem;
-    }
-
-    .activity-user {
-      margin: 0.25rem 0 0 0;
-      font-size: 0.8rem;
-      color: #718096;
-    }
+    .activity-content { flex: 1; }
 
     .activity-time {
       font-size: 0.75rem;
-      color: #a0aec0;
-      flex-shrink: 0;
+      color: #94a3b8;
     }
 
+    /* Responsive */
     @media (max-width: 1024px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
       .charts-grid {
         grid-template-columns: 1fr;
       }
@@ -333,8 +294,18 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
         grid-template-columns: 1fr;
       }
 
-      .page-title {
-        font-size: 1.5rem;
+      .dashboard {
+        padding: 1rem;
+      }
+
+      .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .chart-select {
+        width: 100%;
       }
     }
   `]
@@ -342,7 +313,6 @@ import { DashboardMetrics, AnalyticsData } from '@core/models';
 export class DashboardComponent implements OnInit {
   readonly metrics = signal<DashboardMetrics | null>(null);
   readonly recentActivities = signal<any[]>([]);
-
   timeFrame = 'monthly';
 
   constructor(
@@ -355,31 +325,29 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboardData(): void {
-    this.dashboardService.getMetrics().subscribe((metrics: DashboardMetrics) => {
+    this.dashboardService.getMetrics().subscribe((metrics) => {
       this.metrics.set(metrics);
     });
 
-    this.dashboardService.getRecentActivity().subscribe((activities: any[]) => {
+    this.dashboardService.getRecentActivity().subscribe((activities) => {
       this.recentActivities.set(activities);
     });
   }
 
   onTimeFrameChange(): void {
     this.notificationService.info(`Showing ${this.timeFrame} data`);
-    // In a real app, this would reload data based on timeframe
   }
 
   formatTime(date: Date): string {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - new Date(date).getTime()) / 60000);
-    
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    const diff = Math.floor((now.getTime() - new Date(date).getTime()) / 60000);
+
+    if (diff < 1) return 'Just now';
+    if (diff < 60) return `${diff}m ago`;
+
+    const hours = Math.floor(diff / 60);
+    if (hours < 24) return `${hours}h ago`;
+
+    return `${Math.floor(hours / 24)}d ago`;
   }
 }
